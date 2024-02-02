@@ -1,0 +1,88 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+# TODO(hyunseok.kil): Change hook stage from manual to push after verify
+# each hook.
+exclude: |
+  (?x)^(
+    azero_interfaces/.*|
+    nlrl2/.*
+  )$
+repos:
+- repo: https://github.com/pycqa/isort
+  rev: 5.12.0
+  hooks:
+  - id: isort
+    name: isort (python)
+    args:
+    - --profile=google
+    - --src=nl_navigation
+- repo: local
+  hooks:
+  - id: sdsort
+    name: sdsort
+    language: python
+    entry: sdsort
+    types: [python]
+- repo: https://github.com/google/yapf
+  rev: v0.32.0
+  hooks:
+  - id: yapf
+    name: yapf
+    args:
+    - -i
+    - -r
+    - --style=.style.yapf
+- repo: https://github.com/PyCQA/pylint
+  rev: v2.16.2
+  hooks:
+  - id: pylint
+    name: pylint
+    args:
+    - --rcfile=.pylintrc
+- repo: https://github.com/google/pytype
+  rev: '2023.02.17'
+  hooks:
+  - id: pytype
+    name: pytype
+    args:
+    - --config=.pytype.cfg
+    # NOTE(hyunseok.kil): Because pytype is too heavy to run on every commits,
+    # manually run it by
+    # 'pre-commit run --hook-stage manual' after git add <modified files>
+    stages:
+    - manual
+# Copy from https://github.com/bazelbuild/rules_python/blob/main/.pre-commit-config.yaml
+- repo: https://github.com/keith/pre-commit-buildifier
+  rev: 6.0.0
+  hooks:
+    - id: buildifier
+      args:
+      - --warnings=all
+    - id: buildifier-lint
+      args:
+      - --warnings=all
+      - --diff_command="diff -u"
+- repo: https://github.com/koalaman/shellcheck-precommit
+  rev: v0.9.0
+  hooks:
+  - id: shellcheck
+    args:
+    - --format=gcc
+    - --severity=warning
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.4.0
+  hooks:
+  - id: trailing-whitespace
+  - id: requirements-txt-fixer
+  - id: check-merge-conflict
+- repo: local
+  hooks:
+  - id: bazel
+    name: bazel unittest
+    language: system
+    entry: bazelisk
+    args:
+    - test
+    - //nl_navigation/...
+    always_run: True
+    pass_filenames: False

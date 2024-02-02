@@ -1,0 +1,6 @@
+# See belows for checking avaiable options.
+#
+# https://github.com/google/yapf#id11
+# https://github.com/google/yapf/blob/main/yapf/yapflib/style.py#L484
+[style]
+based_on_style = google

@@ -1,0 +1,7 @@
+# Add packags in alphanumeric order
+pre-commit==3.0.4
+# We don't need the pylint for pre-commit. But add this
+# for convenience (e.g. Generate .pylintrc and check lint with various IDE)
+pylint==2.16.2
+pytype==2023.02.17
+-e git+https://es.naverlabs.com/robot-sw/sdsort#egg=sdsort

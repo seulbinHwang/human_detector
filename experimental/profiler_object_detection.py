@@ -16,20 +16,23 @@
 torch.cuda.is_available()을 통해 CUDA 사용 가능 여부를 확인하고,
 GPU를 사용할 수 있는 경우 ProfilerActivity.CUDA를 활동에 추가하여 GPU 사용량도 함께 프로파일링
 """
-from ultralytics import YOLO
 import os
-from torch.profiler import profile, ProfilerActivity, record_function
-import torch  # torch를 사용하는 경우 추가
+
 from test2 import check_cpu_and_memory_usage
+import torch  # torch를 사용하는 경우 추가
+from torch.profiler import profile
+from torch.profiler import ProfilerActivity
+from torch.profiler import record_function
+from ultralytics import YOLO
 
 use_predict = True
 use_segmentation = False
 use_video = True
 
 if use_segmentation:
-    model = YOLO('yolov8n-seg.pt')
+    model = YOLO('../yolov8n-seg.pt')
 else:
-    model = YOLO('yolov8n.pt')
+    model = YOLO('../yolov8n.pt')
 
 video_dir = "data/test_video/"
 if use_video:
@@ -95,48 +98,48 @@ for source in sources:
 - 호출 횟수가 많은 연산들은 최적화를 통해 전체 실행 시간을 줄일 수 있는 잠재적인 기회를 제공합니다. 예를 들어, 연산을 더 적게 호출하거나, 더 효율적인 방법으로 같은 작업을 수행할 수 있는지 검토할 수 있습니다.
 - 전체적인 성능 분석과 최적화 전략 수립을 위해, 가장 많은 시간을 소비하는 연산과 가장 자주 호출되는 연산에 주목해야 합니다.
 
-- **Name**: 연산의 이름입니다. 
+- **Name**: 연산의 이름입니다.
     예를 들어, `model_predict`는 사용자 정의 함수명으로, 모델의 예측을 실행하는 전체 과정을 의미
     `aten::conv2d`, `aten::silu_` 등은 PyTorch 내부에서 실행된 연산을 나타냄.
 - **Self CPU %**: 전체 프로파일링 시간 중, 해당 연산이 직접 소비한 CPU 시간의 비율
 - **Self CPU**: 해당 연산이 직접 소비한 CPU 시간 (children operator call이 소요한 시간은 포함하지 않음)
 - **CPU total %**: 전체 프로파일링 시간 중, 해당 연산 및 하위 호출이 소비한 CPU 시간의 비율
-    예를 들어, `aten::convolution`은 
+    예를 들어, `aten::convolution`은
         `aten::conv2d`를 포함하여 해당 연산과 관련된 모든 하위 호출의 CPU 시간을 합한 것입니다.
 - **CPU total**: 해당 연산 및 하위 호출이 소비한 총 CPU 시간 (children operator call이 소요한 시간도 포함)
 - **CPU time avg**: 해당 연산을 실행하는 데 평균적으로 소요된 CPU 시간
 - **# of Calls**: 해당 연산이 호출된 횟수입니다.
 
----------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
-                             Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg       CPU Mem  Self CPU Mem    # of Calls  
----------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
-                    model_predict        16.53%     705.110ms       100.00%        4.265s        4.265s           0 b      -4.04 Gb             1  
-                     aten::conv2d         0.94%      40.055ms        39.48%        1.684s     118.494us       1.88 Gb      -6.53 Mb         14208  
-                aten::convolution         2.79%     118.979ms        39.32%        1.677s     118.029us       1.91 Gb      42.89 Mb         14208  
-               aten::_convolution        -1.76%  -74847.000us        39.18%        1.671s     117.615us       1.98 Gb    -405.47 Mb         14208  
-                aten::thnn_conv2d         5.38%     229.505ms        38.63%        1.647s     115.955us       2.27 Gb      83.52 Mb         14208  
-       aten::_slow_conv2d_forward        35.44%        1.511s        38.50%        1.642s     115.555us       2.47 Gb      -5.01 Gb         14208  
-                      aten::silu_        27.37%        1.167s        27.37%        1.167s      92.249us      -5.00 Mb      -5.00 Mb         12654  
-                      aten::copy_         4.10%     174.949ms         4.10%     174.949ms       7.319us     168.37 Mb      90.17 Mb         23903  
-                        aten::cat         2.18%      92.868ms         2.37%     101.064ms      22.783us       1.19 Gb     915.73 Mb          4436  
-                 aten::max_pool2d         0.06%       2.447ms         1.84%      78.406ms     117.727us      26.25 Mb     -28.27 Mb           666  
----------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+---------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------
+                             Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg       CPU Mem  Self CPU Mem    # of Calls
+---------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------
+                    model_predict        16.53%     705.110ms       100.00%        4.265s        4.265s           0 b      -4.04 Gb             1
+                     aten::conv2d         0.94%      40.055ms        39.48%        1.684s     118.494us       1.88 Gb      -6.53 Mb         14208
+                aten::convolution         2.79%     118.979ms        39.32%        1.677s     118.029us       1.91 Gb      42.89 Mb         14208
+               aten::_convolution        -1.76%  -74847.000us        39.18%        1.671s     117.615us       1.98 Gb    -405.47 Mb         14208
+                aten::thnn_conv2d         5.38%     229.505ms        38.63%        1.647s     115.955us       2.27 Gb      83.52 Mb         14208
+       aten::_slow_conv2d_forward        35.44%        1.511s        38.50%        1.642s     115.555us       2.47 Gb      -5.01 Gb         14208
+                      aten::silu_        27.37%        1.167s        27.37%        1.167s      92.249us      -5.00 Mb      -5.00 Mb         12654
+                      aten::copy_         4.10%     174.949ms         4.10%     174.949ms       7.319us     168.37 Mb      90.17 Mb         23903
+                        aten::cat         2.18%      92.868ms         2.37%     101.064ms      22.783us       1.19 Gb     915.73 Mb          4436
+                 aten::max_pool2d         0.06%       2.447ms         1.84%      78.406ms     117.727us      26.25 Mb     -28.27 Mb           666
+---------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------
 
 
----------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
-                             Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg       CPU Mem  Self CPU Mem    # of Calls  
----------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
-                      aten::empty         0.05%       2.251ms         0.05%       2.251ms       0.081us       4.85 Gb       4.85 Gb         27665  
-                    aten::resize_         0.13%       5.678ms         0.13%       5.678ms       0.394us       1.04 Gb       1.04 Gb         14426  
-                        aten::cat         2.18%      92.868ms         2.37%     101.064ms      22.783us       1.19 Gb     915.73 Mb          4436  
-                    aten::reshape         0.10%       4.304ms         0.23%       9.911ms       0.667us       1.15 Gb     889.53 Mb         14862  
-                       aten::view         0.27%      11.441ms         0.27%      11.441ms       0.318us     884.53 Mb     883.76 Mb         35948  
-                     aten::narrow         0.19%       8.037ms         0.26%      11.022ms       0.843us     306.44 Mb     301.94 Mb         13078  
-                 aten::empty_like         0.03%       1.181ms         0.04%       1.564ms       0.652us     197.50 Mb     159.78 Mb          2397  
-                        aten::add         0.27%      11.461ms         0.27%      11.461ms       4.701us     123.72 Mb     123.72 Mb          2438  
-              aten::empty_strided         0.03%       1.197ms         0.03%       1.197ms       0.319us     108.78 Mb     108.78 Mb          3754  
-                      aten::copy_         4.10%     174.949ms         4.10%     174.949ms       7.319us     168.37 Mb      90.17 Mb         23903  
----------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+---------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------
+                             Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg       CPU Mem  Self CPU Mem    # of Calls
+---------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------
+                      aten::empty         0.05%       2.251ms         0.05%       2.251ms       0.081us       4.85 Gb       4.85 Gb         27665
+                    aten::resize_         0.13%       5.678ms         0.13%       5.678ms       0.394us       1.04 Gb       1.04 Gb         14426
+                        aten::cat         2.18%      92.868ms         2.37%     101.064ms      22.783us       1.19 Gb     915.73 Mb          4436
+                    aten::reshape         0.10%       4.304ms         0.23%       9.911ms       0.667us       1.15 Gb     889.53 Mb         14862
+                       aten::view         0.27%      11.441ms         0.27%      11.441ms       0.318us     884.53 Mb     883.76 Mb         35948
+                     aten::narrow         0.19%       8.037ms         0.26%      11.022ms       0.843us     306.44 Mb     301.94 Mb         13078
+                 aten::empty_like         0.03%       1.181ms         0.04%       1.564ms       0.652us     197.50 Mb     159.78 Mb          2397
+                        aten::add         0.27%      11.461ms         0.27%      11.461ms       4.701us     123.72 Mb     123.72 Mb          2438
+              aten::empty_strided         0.03%       1.197ms         0.03%       1.197ms       0.319us     108.78 Mb     108.78 Mb          3754
+                      aten::copy_         4.10%     174.949ms         4.10%     174.949ms       7.319us     168.37 Mb      90.17 Mb         23903
+---------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------
 
 Self CPU time total: 4.361s
 

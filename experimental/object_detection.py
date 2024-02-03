@@ -1,15 +1,17 @@
-from ultralytics import YOLO
-import numpy as np
 import os
+
+import numpy as np
+from ultralytics import YOLO
+
 use_predict = True
 use_segmentation = False
 use_video = True
 # Load a pretrained YOLOv8n-seg Segment model
 if use_segmentation:
-    model = YOLO('yolov8n-seg.pt')
+    model = YOLO('../yolov8n-seg.pt')
 else:
     # Load a model
-    model = YOLO('yolov8n.pt')
+    model = YOLO('../yolov8n.pt')
 # Run batched inference on a list of images.
 """
 source
@@ -48,10 +50,18 @@ if use_predict:
         # "160x90" -> (160, 90)
         print("input_size:", input_size)
         # input_size = tuple(map(int, input_size.split("x")))
-        input_size = (32*6, 32*10)
+        input_size = (32 * 6, 32 * 10)
         # WARNING ⚠️ imgsz=[160, 90] must be multiple of max stride 32, updating to [160, 96]
         # imgsz=input_size,
-        model.predict(source=source, save=True, conf=0.5, classes=0, imgsz=input_size, vid_stride=3, stream_buffer=True, show_labels=False, show_conf=False)
+        model.predict(source=source,
+                      save=True,
+                      conf=0.5,
+                      classes=0,
+                      imgsz=input_size,
+                      vid_stride=3,
+                      stream_buffer=True,
+                      show_labels=False,
+                      show_conf=False)
     """
     show: (bool)
     save: (bool)
@@ -70,23 +80,23 @@ if use_predict:
     half: (bool) use FP16 half-precision inference
         - FP16 반정밀도(half-precision) 연산을 사용할지 여부를 결정
         - 특히 GPU에서의 계산 속도를 높이고 메모리 사용량을 줄이는 효과
-        
-    stream_buffer: (bool) buffer all streaming frames (True) 
+
+    stream_buffer: (bool) buffer all streaming frames (True)
         or return the most recent frame (False)
-        - 만약 True로 설정된다면, 모델은 비디오 스트림에서 오는 모든 프레임을 버퍼에 저장하게 됩니다. 
-            - 이는 처리 속도보다 더 빠른 속도로 비디오 스트림이 전송될 때 유용합니다. 
-            - 모든 프레임이 처리되어 중요한 정보가 누락되지 않도록 합니다. 
-        - 반면, False로 설정되면, 모델은 가장 최근에 수신된 프레임만을 반환하고 처리합니다. 
+        - 만약 True로 설정된다면, 모델은 비디오 스트림에서 오는 모든 프레임을 버퍼에 저장하게 됩니다.
+            - 이는 처리 속도보다 더 빠른 속도로 비디오 스트림이 전송될 때 유용합니다.
+            - 모든 프레임이 처리되어 중요한 정보가 누락되지 않도록 합니다.
+        - 반면, False로 설정되면, 모델은 가장 최근에 수신된 프레임만을 반환하고 처리합니다.
             - 이는 리소스가 제한적이거나 가장 최신의 데이터만 중요한 경우에 유용할 수 있습니다.
-            
+
     vid_stride: (bool): video frame-rate stride
-        - boolean이 아니라 정수(int) 타입으로 설정되어야 합니다. 
-        - vid_stride는 비디오 프레임을 처리할 때의 간격을 지정합니다. 
-        - 예를 들어, vid_stride가 1로 설정되면 모든 프레임이 처리됩니다. 
-        - vid_stride가 2로 설정되면, 하나 걸러 하나씩 프레임이 처리됩니다. 
-        - 이는 처리해야 할 프레임 수를 줄여 성능을 향상시킬 수 있지만, 
+        - boolean이 아니라 정수(int) 타입으로 설정되어야 합니다.
+        - vid_stride는 비디오 프레임을 처리할 때의 간격을 지정합니다.
+        - 예를 들어, vid_stride가 1로 설정되면 모든 프레임이 처리됩니다.
+        - vid_stride가 2로 설정되면, 하나 걸러 하나씩 프레임이 처리됩니다.
+        - 이는 처리해야 할 프레임 수를 줄여 성능을 향상시킬 수 있지만,
         - 중요한 정보를 놓칠 수 있는 위험이 있습니다.
-        
+
     hide_labels: (bool)
     hide_conf: (bool)
     """
@@ -116,8 +126,6 @@ else:
         # probs = result.probs  # Probs object for classification outputs
         # # A Probs object containing probabilities of each class
         # # for classification task.
-
-
 """
 result.boxes
 
@@ -138,13 +146,12 @@ xyxyn: tensor([[0.3686, 0.2674, 0.8415, 0.7343]])
   - Return the boxes in xyxy format normalized by original image size.
 
 """
-
 """
 Masks
 - data:
 - orig_shape: (3000, 4000)
 - shape: torch.Size([1, 480, 640])
-- xy: (torch.Tensor) # (1, 390, 2) 
+- xy: (torch.Tensor) # (1, 390, 2)
   - low 값을 -> np.array로 변환하거나, torch.Tensor로 변환하거나 해야함.
   - A list of normalized segments represented as tensors.
 - xyn: (torch.Tensor) # (1, 390, 2)
@@ -154,8 +161,6 @@ Masks
 
 
 """
-
-
 """
 probs
 - detection을 하던, segmentation을 하던 -> 모두 None이 나왔는데 확인 필요

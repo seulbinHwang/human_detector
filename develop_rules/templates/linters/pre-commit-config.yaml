@@ -75,14 +75,13 @@ repos:
   - id: trailing-whitespace
   - id: requirements-txt-fixer
   - id: check-merge-conflict
+
+
 - repo: local
   hooks:
-  - id: bazel
-    name: bazel unittest
+  - id: unittest
+    name: unittest
     language: system
-    entry: bazelisk
-    args:
-    - test
-    - //nl_navigation/...
+    entry: python -m unittest discover -s . -p 'test*.py' -p '*test.py'
     always_run: True
     pass_filenames: False
